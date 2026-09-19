@@ -16,73 +16,97 @@
 -->
 <body>
 
-  <header>
-    <h1>Mesa de ayuda</h1>
-    <p>Tickets de soporte de la oficina</p>
+  <header  class="max-w-6xl mx-auto px-4 pt-8 pb-4">
+    <h1 class="text-3xl font-bold">Mesa de ayuda</h1>
+    <p class="text-slate-600">Tickets de soporte de la oficina</p>
   </header>
 
-  <main>
+  <main class="max-w-6xl mx-auto px-4 pb-8 grid gap-6 lg:grid-cols-3">
 
     <!-- Formulario: crea tickets y, desde el nivel 4, también los edita -->
-    <section>
-      <h2 id="titulo-formulario">Nuevo ticket</h2>
-
-      <form id="form-ticket" novalidate>
-        <label for="titulo">Título</label>
-        <input id="titulo" name="titulo" type="text">
-        <p id="error-titulo"></p>
-
-        <label for="descripcion">Descripción</label>
-        <textarea id="descripcion" name="descripcion" rows="3"></textarea>
-
-        <label for="solicitante">Solicitante</label>
-        <input id="solicitante" name="solicitante" type="text">
-        <p id="error-solicitante"></p>
-
-        <label for="categoria">Categoría</label>
-        <select id="categoria" name="categoria">
-          <option value="hardware">Hardware</option>
-          <option value="software">Software</option>
-          <option value="red">Red</option>
-          <option value="accesos">Accesos</option>
-        </select>
-
-        <label for="prioridad">Prioridad</label>
-        <select id="prioridad" name="prioridad">
-          <option value="baja">Baja</option>
-          <option value="media" selected>Media</option>
-          <option value="alta">Alta</option>
-        </select>
-
-        <button id="btn-guardar" type="submit">Crear ticket</button>
-        <button id="btn-cancelar" type="button" hidden>Cancelar edición</button>
+    <section class="lg:col-span-1 bg-white rounded-lg shadow p-4">
+      <h2 id="titulo-formulario" class="text-xl font-semibold mb-4">Nuevo ticket</h2>
+ 
+      <form id="form-ticket" novalidate class="space-y-3">
+ 
+        <div>
+          <label for="titulo" class="block text-sm font-medium mb-1">Título</label>
+          <input id="titulo" name="titulo" type="text"
+                 class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+          <p id="error-titulo" class="text-sm text-red-600"></p>
+        </div>
+ 
+        <div>
+          <label for="descripcion" class="block text-sm font-medium mb-1">Descripción</label>
+          <textarea id="descripcion" name="descripcion" rows="3"
+                    class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"></textarea>
+        </div>
+ 
+        <div>
+          <label for="solicitante" class="block text-sm font-medium mb-1">Solicitante</label>
+          <input id="solicitante" name="solicitante" type="text"
+                 class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+          <p id="error-solicitante" class="text-sm text-red-600"></p>
+        </div>
+ 
+        <div>
+          <label for="categoria" class="block text-sm font-medium mb-1">Categoría</label>
+          <select id="categoria" name="categoria"
+                  class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <option value="hardware">Hardware</option>
+            <option value="software">Software</option>
+            <option value="red">Red</option>
+            <option value="accesos">Accesos</option>
+          </select>
+        </div>
+ 
+        <div>
+          <label for="prioridad" class="block text-sm font-medium mb-1">Prioridad</label>
+          <select id="prioridad" name="prioridad"
+                  class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <option value="baja">Baja</option>
+            <option value="media" selected>Media</option>
+            <option value="alta">Alta</option>
+          </select>
+        </div>
+ 
+        <button id="btn-guardar" type="submit"
+                class="w-full rounded-md bg-sky-600 px-4 py-2 text-white font-medium hover:bg-sky-700">Crear ticket</button>
+ 
+        <button id="btn-cancelar" type="button" hidden
+                class="w-full rounded-md border border-slate-300 px-4 py-2 font-medium hover:bg-slate-100">Cancelar edición</button>
       </form>
     </section>
-
-    <!-- Tablero -->
-    <section>
-      <h2>Tickets</h2>
-
-      <div id="resumen"></div>
-
-      <div>
-        <label for="filtro-estado">Estado</label>
-        <select id="filtro-estado">
-          <option value="todos">Todos</option>
-          <option value="abierto">Abiertos</option>
-          <option value="en_progreso">En progreso</option>
-          <option value="resuelto">Resueltos</option>
-        </select>
-
-        <label for="busqueda">Buscar</label>
-        <input id="busqueda" type="search" placeholder="Buscar por título">
+ 
+    <section class="lg:col-span-2 bg-white rounded-lg shadow p-4">
+      <h2 class="text-xl font-semibold mb-4">Tickets</h2>
+ 
+      <div id="resumen" class="text-sm text-slate-600 mb-4"></div>
+ 
+      <div class="grid gap-3 md:grid-cols-2 mb-4">
+        <div>
+          <label for="filtro-estado" class="block text-sm font-medium mb-1">Estado</label>
+          <select id="filtro-estado"
+                  class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <option value="todos">Todos</option>
+            <option value="abierto">Abiertos</option>
+            <option value="en_progreso">En progreso</option>
+            <option value="resuelto">Resueltos</option>
+          </select>
+        </div>
+ 
+        <div>
+          <label for="busqueda" class="block text-sm font-medium mb-1">Buscar</label>
+          <input id="busqueda" type="search" placeholder="Buscar por título"
+                 class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+        </div>
       </div>
-
-      <p id="mensaje"></p>
-
-      <div id="lista-tickets"></div>
+ 
+      <p id="mensaje" class="text-sm text-slate-600"></p>
+ 
+      <div id="lista-tickets" class="grid gap-4 md:grid-cols-2"></div>
     </section>
-
+ 
   </main>
 
 </body>
