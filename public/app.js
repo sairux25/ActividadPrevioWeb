@@ -124,8 +124,15 @@ function crearTarjeta(ticket) {
 
     const botonEditar=document.createElement("button");
     botonEditar.type="button";
-    botonEditar.className="rounded-md bg-sky-600 px-3 py-1 text-sm font-medium text-white hover:bg-sky-700";
-    
+    botonEditar.className="rounded-md bg-orange-400 px-3 py-1 text-sm font-medium text-white hover:bg-orange-600";
+    botonEditar.textContent="Editar";
+    botonEditar.addEventListener("click", () => editarTicket(ticket));
+
+    const botonEliminar=document.createElement("button");
+    botonEliminar.type="button";
+    botonEliminar.className="rounded-md bg-rose-500 px-3 py-1 text-sm font-medium text-white hover:bg-rose-700";
+    botonEliminar.textContent="Eliminar";
+    botonEliminar.addEventListener("click", () => eliminarTicket(ticket));
 
     if(datoEstado.siguiente){
         const botonSiguienteEstado=document.createElement("button");
@@ -136,34 +143,13 @@ function crearTarjeta(ticket) {
         botonSiguienteEstado.addEventListener("click", () => avanzarEstado(ticket, botonSiguienteEstado));
  
         botones.appendChild(botonSiguienteEstado);
-        tarjeta.appendChild(botones);
     }
 
+    botones.appendChild(botonEditar);
+    botones.appendChild(botonEliminar);
+    tarjeta.appendChild(botones);
 
     return tarjeta;
-}
-
-
-function editarTicket (ticket){
-  tituloFormulario.textContent=`Editar ticket #${ticket.id}`;
-  inputTitulo.value=ticket.titulo;
-  inputDescripcion.value=ticket.descripcion;
-  inputSolicitante.value=ticket.solicitante;
-  inputCategoria.value= ticket.categoria;
-  inputPrioridad.value=ticket.prioridad;
-  botonGuardar.textContent="Guardar cambios";
-  botonCancelar.hidden=false;
-  idEnEdicion=ticket.id;
-}
-
-
-function volverModoCreacion(){
-  formulario.reset();
-
-  idEnEdicion=null;
-  tituloFormulario.textContent="Nuevo ticket";
-  botonGuardar.textContent="Crear ticket";
-  botonCancelar.hidden=true
 }
 
 
@@ -199,7 +185,34 @@ async function avanzarEstado(ticket,boton) {
         boton.disabled = false;
     }
 
-}   
+} 
+
+async function eliminarTicket(ticket) {
+  if(!confirm(`¿Seguro que quiere eliminar el ticket ${ticket.id}?`)){
+    return;
+  }
+  try{
+    const respuesta=await fetch(`${API_URL}/${ticket.id}`,{
+        method:"DELETE",
+    });
+
+    if(!respuesta.ok){
+      throw new Error(`La API respondió ${respuesta.status}`);
+    }
+
+    tickets=tickets.filter((t)=> t.id!==ticket.id);
+
+    if(ticket.id===idEnEdicion){
+      volverModoCreacion();
+    }
+
+    pintarTickets();
+
+  }catch(error){
+    console.error("Falló el DELETE del ticket", ticket.id, error);
+  }
+
+}
 
 function validarFormulario(){
     let valido=true;
@@ -225,20 +238,26 @@ formulario.addEventListener("submit", async(e) =>{
     if (!validarFormulario()) {
     return;
     }
+
+    const editando=idEnEdicion!==null;
+    const url=editando?`${API_URL}/${idEnEdicion}`:API_URL;
+    const metodo=editando?"PUT":"POST";
+    const estadoTicket=editando?tickets.find((t)=>t.id===idEnEdicion).estado:"abierto";
+
     const nuevoTicket = {
         titulo: inputTitulo.value.trim(),
         descripcion: inputDescripcion.value.trim(),
         solicitante: inputSolicitante.value.trim(),
         categoria: inputCategoria.value,
         prioridad: inputPrioridad.value,
-        estado: "abierto",
+        estado: estadoTicket,
     };
 
     botonGuardar.disabled = true;
 
     try{
-        const respuesta= await fetch(API_URL, {
-            method:"POST",
+        const respuesta= await fetch(url, {
+            method:metodo,
             headers:{"Content-Type":"application/json"},
             body: JSON.stringify(nuevoTicket),
         });
@@ -247,15 +266,23 @@ formulario.addEventListener("submit", async(e) =>{
             throw new Error(`La API respondió ${respuesta.status}`);
         }
 
-        const ticketCreado = await respuesta.json();
-        tickets.push(ticketCreado);
+        const ticketGuardado = await respuesta.json();
+
+        if(editando){
+          const indice=tickets.findIndex((t)=>t.id===idEnEdicion);
+          tickets[indice]=ticketGuardado;
+        }else{
+          tickets.push(ticketGuardado);
+        }
 
         pintarTickets();
-        formulario.reset();
-    }catch{
-        console.error("Falló el POST a", API_URL, error);   
+        volverModoCreacion();
+
+    }catch(error){
+        console.error(`Falló el ${metodo} a ${url}`, error);   
+        mensaje.textContent=editando? "No se guaradaron los cambios del ticket": "No se pudo crear el ticket";
     }finally{
-        botonGuardar=false;
+        botonGuardar.disabled=false;
     }
 });
 
@@ -272,4 +299,28 @@ inputSolicitante.addEventListener("input", () => {
 });
 
 
+function editarTicket (ticket){
+  tituloFormulario.textContent=`Editar ticket #${ticket.id}`;
+  inputTitulo.value=ticket.titulo;
+  inputDescripcion.value=ticket.descripcion;
+  inputSolicitante.value=ticket.solicitante;
+  inputCategoria.value= ticket.categoria;
+  inputPrioridad.value=ticket.prioridad;
+  botonGuardar.textContent="Guardar cambios";
+  botonCancelar.hidden=false;
+  idEnEdicion=ticket.id;
+}
+
+
+function volverModoCreacion(){
+  formulario.reset();
+  idEnEdicion=null;
+  tituloFormulario.textContent="Nuevo ticket";
+  botonGuardar.textContent="Crear ticket";
+  botonCancelar.hidden=true;
+  errorTitulo.textContent="";
+  errorSolicitante.textContent="";
+}
+
+botonCancelar.addEventListener("click", volverModoCreacion);
 listarTickets();
