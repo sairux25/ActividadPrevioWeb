@@ -20,7 +20,9 @@ const inputCategoria=document.querySelector("#categoria");
 const inputPrioridad=document.querySelector("#prioridad");
 const botonCancelar=document.querySelector("#btn-cancelar");
 let idEnEdicion=null;
-
+const filtroEstado=document.querySelector("#filtro-estado");
+const inputBusqueda=document.querySelector("#busqueda");
+const resumen=document.querySelector("#resumen");
 
 const ESTADOS = {
   abierto: {
@@ -76,15 +78,41 @@ async function listarTickets(){
 
 function pintarTickets() {
   listaTickets.innerHTML = "";
- 
+  const estadoElegido=filtroEstado.value;
+  const textoBusqueda=inputBusqueda.value.toLowerCase();
+
+  const visibles=tickets.filter((t)=> {
+    return (estadoElegido==="todos" || t.estado===estadoElegido) && t.titulo.toLowerCase().includes(textoBusqueda)
+  });
+
   if (tickets.length === 0) {
     mensaje.textContent = "Todavía no hay tickets. Crea el primero con el formulario.";
-    return;
+  }else if(visibles.length===0){
+    mensaje.textContent="No hay tickets que coincidan con la busqueda";
+  }else{
+    mensaje.textContent="";
   }
-  tickets.forEach((ticket) => {
+
+  visibles.forEach((ticket) => {
     listaTickets.appendChild(crearTarjeta(ticket));
   });
+
+  pintarResumen();
+
 }
+
+
+function pintarResumen(){
+  const conteo=tickets.reduce((acumulado,t)=>{
+    acumulado[t.estado]=acumulado[t.estado]+1;
+    return acumulado;
+  }, {abierto:0, en_progreso:0,resuelto:0} );
+
+  const altaPendientes= tickets.filter((t)=> t.prioridad==="alta"&& t.estado!=="resuelto");
+  resumen.textContent=`Abierto: ${conteo.abierto}, en progreso: ${conteo.en_progreso}, resueltos: ${conteo.resuelto}, prioridad alta sin resolver: ${altaPendientes.length}`;
+
+}
+
 
 function crearTarjeta(ticket) {
     const datoEstado=ESTADOS[ticket.estado];
@@ -322,5 +350,8 @@ function volverModoCreacion(){
   errorSolicitante.textContent="";
 }
 
-botonCancelar.addEventListener("click", volverModoCreacion);
+
 listarTickets();
+botonCancelar.addEventListener("click", volverModoCreacion);
+filtroEstado.addEventListener("change", pintarTickets);
+inputBusqueda.addEventListener("input", pintarTickets);
